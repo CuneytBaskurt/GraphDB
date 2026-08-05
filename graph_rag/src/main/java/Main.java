@@ -1,42 +1,58 @@
 import java.util.HashMap;
 import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import model.TableSchema;
+import pipeline.ExtractionPipeline;
 import source_connect.DatabaseConnection;
 import source_connect.DatabaseFactory;
 import source_connect.JdbcConnection;
 import util.DatabaseChunkedReader;
 import util.SchemaDiscoverer;
-import util.TableChunk;
+import writer.NdjsonWriter;
 
 public class Main {
+    private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
-	private static final Logger logger = LoggerFactory.getLogger(Main.class);
+    public static void main(String[] args) {
+        AdapterInitializer.registerAll();
+        
+        DatabaseConnection conn = DatabaseFactory.createConnection("MYSQL");
+        if (!(conn instanceof JdbcConnection)) {
+            throw new IllegalStateException("Bu kaynak tipi chunked reading desteklemiyor.");
+        }
 
-	public static void main(String[] args) {
-		
-		AdapterInitializer.registerAll();
+        JdbcConnection jdbcConn = (JdbcConnection) conn;
+        jdbcConn.connect(new HashMap<>());
 
-		DatabaseConnection conn = DatabaseFactory.createConnection("MYSQL");
+        try {
+            // 1. Şema Keşfi
+            SchemaDiscoverer discoverer = new SchemaDiscoverer();
+            Map<String, TableSchema> schemas = discoverer.discoverSchema(jdbcConn.getConnection());
 
-		if (!(conn instanceof JdbcConnection)) {
-		    throw new IllegalStateException("Bu kaynak tipi chunked reading desteklemiyor.");
-		}
-		JdbcConnection jdbcConn = (JdbcConnection) conn;
+            // 2. Parçalı Okuyucu ve Yazıcı
+            DatabaseChunkedReader chunkReader = new DatabaseChunkedReader(jdbcConn, 500);
+            
+            try (NdjsonWriter writer = new NdjsonWriter("output.ndjson")) {
+                // 3. Pipeline Orkestrasyonu
+                ExtractionPipeline pipeline = new ExtractionPipeline(
+                    chunkReader,
+                    schemas,
+                    "default_tenant",
+                    "MYSQL",
+                    writer
+                );
+                
+                pipeline.execute();
+            }
 
-		Map<String, String> config = new HashMap<>();
-		jdbcConn.connect(config);   
-		
-		SchemaDiscoverer discoverer = new SchemaDiscoverer();
-		Map<String, TableSchema> schemas = discoverer.discoverSchema(jdbcConn.getConnection());
+            logger.info("İşlem başarıyla sonlandı. 'output.ndjson' dosyası oluşturuldu.");
 
-		for (TableSchema schema : schemas.values()) {
-		    System.out.println(schema);
-		}   
-		
-	} 
-
+        } catch (Exception e) {
+            logger.error("Ana akışta hata oluştu", e);
+        } finally {
+            jdbcConn.disconnect();
+        }
+    }
 }
