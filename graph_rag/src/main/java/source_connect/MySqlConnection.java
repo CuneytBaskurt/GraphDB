@@ -9,11 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import config.ConfigLoader;
+import graph_connect.Neo4jConnection;
 
 
 public class MySqlConnection implements JdbcConnection {
 
-    private static final Logger logger = LoggerFactory.getLogger(MySqlConnection.class);
+    private static final Logger logger = LoggerFactory.getLogger(Neo4jConnection.class);
 
     private Connection connection;
     

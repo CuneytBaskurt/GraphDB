@@ -10,7 +10,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class RowToEdgeMapper {
+	
+    private static final Logger logger = LoggerFactory.getLogger(RowToEdgeMapper.class);
+
 
     public static List<GraphEdge> map(Map<String, Object> row, TableSchema schema, String tenantId) {
         List<GraphEdge> edges = new ArrayList<>();
@@ -50,7 +56,10 @@ public class RowToEdgeMapper {
             }
         } else {
             String sourcePk = RowToNodeMapper.extractPkValue(row, schema.getPrimaryKeyColumns());
-            if (sourcePk == null) return edges;
+            if (sourcePk == null) {
+                logger.warn("'{}' tablosunda PK değeri null, edge üretilemedi. Satır: {}", schema.getTableName(), row);
+                return edges;
+            }
 
             String sourceId = tenantId + "::" + schema.getTableName() + "::" + sourcePk;
 

@@ -5,6 +5,7 @@ public class AdapterInitializer {
     private static final Logger logger = LoggerFactory.getLogger(AdapterInitializer.class);
     private static boolean initialized = false;
 
+    //Veritabanı classlarındaki static metotları çağırıyoruz.
     public static synchronized void registerAll() {
         if (initialized) {
             logger.debug("Adapter'lar zaten kayıtlı, tekrar yüklenmiyor.");

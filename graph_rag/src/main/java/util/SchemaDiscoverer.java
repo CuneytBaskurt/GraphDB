@@ -20,21 +20,23 @@ public class SchemaDiscoverer {
 	
     private static final Logger logger = LoggerFactory.getLogger(SchemaDiscoverer.class);
     
+    //Veritabanlarından bilgi çekmek için kullanılır
     public Map<String, TableSchema> discoverSchema(Connection connection) {
         try {
-            DatabaseMetaData metaData = connection.getMetaData();
-            String catalog = connection.getCatalog();
+            DatabaseMetaData metaData = connection.getMetaData(); //Veritabanı metadatası çekilir
+            String catalog = connection.getCatalog(); //Catalog çekilir
 
-            List<String> tableNames = discoverTableNames(metaData, catalog);
+            List<String> tableNames = discoverTableNames(metaData, catalog); //Tablo isimlerini tableNames listesine kaydeder
             Map<String, TableSchema> schemas = new LinkedHashMap<>();
 
             // 1. Faz: her tablo için PK bilgisini topla
             for (String tableName : tableNames) {
                 TableSchema schema = new TableSchema(tableName);
-                loadPrimaryKeys(metaData, catalog, tableName, schema);
+                loadPrimaryKeys(metaData, catalog, tableName, schema); //PK değerlerini çeker
                 schemas.put(tableName, schema);
             }
             
+            // 2. Faz: her tablo için FK bilgisini toplar
             for (String tableName : tableNames) {
                 loadForeignKeys(metaData, catalog, tableName, schemas.get(tableName));
             }

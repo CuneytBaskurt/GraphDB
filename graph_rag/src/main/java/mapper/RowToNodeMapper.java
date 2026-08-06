@@ -13,7 +13,7 @@ public class RowToNodeMapper {
 
     public static GraphNode map(Map<String, Object> row, TableSchema schema, String tenantId) {
         if (schema.isJunctionTable()) {
-            return null; // Junction tablolar düğüm (Node) üretmez
+            return null;
         }
 
         String pkValue = extractPkValue(row, schema.getPrimaryKeyColumns());
@@ -54,7 +54,7 @@ public class RowToNodeMapper {
         for (int i = 0; i < pkColumns.size(); i++) {
             Object val = row.get(pkColumns.get(i));
             if (val == null) return null;
-            if (i > 0) sb.append("_");
+            if (i > 0) sb.append("::");
             sb.append(val.toString());
         }
         return sb.toString();

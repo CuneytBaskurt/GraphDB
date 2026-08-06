@@ -10,6 +10,7 @@ public class DatabaseConnectionRegistry {
     private static final Logger logger = LoggerFactory.getLogger(DatabaseConnectionRegistry.class);
     private static final Map<String, Supplier<DatabaseConnection>> registry = new HashMap<>();
 
+    //Veritabanlarının static metotları ile gelip kendilerini kaydettirdikleri metot.
     public static void register(String dbType, Supplier<DatabaseConnection> supplier) {
         String key = normalize(dbType);
         if (registry.containsKey(key)) {
@@ -19,6 +20,7 @@ public class DatabaseConnectionRegistry {
         logger.info("'{}' veritabanı adapter'ı registry'ye kaydedildi.", key);
     }
 
+    //Veritabanı bağlantısını yarattığımız metot.
     public static DatabaseConnection create(String dbType) {
         Supplier<DatabaseConnection> supplier = registry.get(normalize(dbType));
         if (supplier == null) {
