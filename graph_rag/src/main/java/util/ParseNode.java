@@ -16,9 +16,11 @@ public class ParseNode {
     private final ObjectMapper mapper = new ObjectMapper();
 
     private final AddNode addNode;
+    private final DeleteNode deleteNode;
 
     public ParseNode(Driver driver) {
         this.addNode = new AddNode(driver);
+        deleteNode = new DeleteNode(driver);
     }
 
     public void parse() {
@@ -35,14 +37,23 @@ public class ParseNode {
                 if (!"NODE".equals(json.path("entityType").asText())) {
                     continue;
                 }
+                
+                String operation = json.path("operation").asText();
 
                 String id = json.path("node").path("id").asText();
 
                 String label = json.path("node").path("labels").get(0).asText();
 
                 Map<String, Object> properties =mapper.convertValue(json.path("node").path("properties"),new TypeReference<Map<String, Object>>() {});
+                
+                if ("INSERT".equals(operation) || "UPDATE".equals(operation)) {
+                	addNode.addNode(id, label, properties);
+                }
+                else if ("DELETE".equals(operation)) {
+                    deleteNode.delete(id);
+                }
 
-                addNode.addNode(id, label, properties);
+                
 
             }
 

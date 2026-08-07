@@ -16,9 +16,12 @@ public class ParseEdge {
 	 private final ObjectMapper mapper = new ObjectMapper();
 
 	    private final AddEdge addEdge;
+	    private final DeleteEdge deleteEdge;
+
 
 	    public ParseEdge(Driver driver) {
 	        this.addEdge = new AddEdge(driver);
+	        this.deleteEdge = new DeleteEdge(driver);
 	    }
 
 	    public void parse() {
@@ -45,8 +48,19 @@ public class ParseEdge {
 	                String target = json.path("edge").path("target").asText();
 
 	                Map<String, Object> properties =mapper.convertValue(json.path("edge").path("properties"),new TypeReference<Map<String, Object>>() {});
+	                
+	                String operation = json.path("operation").asText();
 
-	                addEdge.addEdge(id, type, source, target, properties);
+	                if ("INSERT".equals(operation) || "UPDATE".equals(operation)) {
+
+	                    addEdge.addEdge(id, type, source, target, properties);
+
+	                }
+	                else if ("DELETE".equals(operation)) {
+
+	                    deleteEdge.delete(id);
+
+	                }
 
 	            }
 
