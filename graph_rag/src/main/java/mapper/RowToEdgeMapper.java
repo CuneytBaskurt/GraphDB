@@ -31,8 +31,8 @@ public class RowToEdgeMapper {
                 String targetPk = RowToNodeMapper.extractPkValue(row, fk2.getSourceColumns());
 
                 if (sourcePk != null && targetPk != null) {
-                    String sourceId = tenantId + "::" + fk1.getTargetTable() + "::" + sourcePk;
-                    String targetId = tenantId + "::" + fk2.getTargetTable() + "::" + targetPk;
+                    String sourceId = tenantId + "::" + fk2.getTargetTable() + "::" + targetPk;
+                    String targetId = tenantId + "::" + fk1.getTargetTable() + "::" + sourcePk;
 
                     String edgeType = schema.getTableName().toUpperCase();
                     String edgeId = sourceId + "->" + edgeType + "->" + targetId;
@@ -68,10 +68,13 @@ public class RowToEdgeMapper {
                 if (targetPk != null) {
                     String targetId = tenantId + "::" + fk.getTargetTable() + "::" + targetPk;
                     
-                    String edgeType = "HAS_" + fk.getTargetTable().toUpperCase();
-                    String edgeId = sourceId + "->" + edgeType + "->" + targetId;
+                    String reversedSourceId = targetId;
+                    String reversedTargetId = sourceId;
+                    
+                    String edgeType = "HAS_" + schema.getTableName().toUpperCase();
+                    String edgeId = reversedSourceId + "->" + edgeType + "->" + reversedTargetId;
 
-                    GraphEdge edge = new GraphEdge(edgeId, edgeType, sourceId, targetId);
+                    GraphEdge edge = new GraphEdge(edgeId, edgeType, reversedSourceId, reversedTargetId);
                     edges.add(edge);
                 }
             }
