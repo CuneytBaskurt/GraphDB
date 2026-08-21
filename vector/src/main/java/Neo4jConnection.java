@@ -36,7 +36,7 @@ public class Neo4jConnection {
 	public Neo4jConnection() {
 		driver = GraphDatabase.driver(
 				"bolt://localhost:7687",
-				AuthTokens.basic("neo4j", "Mellon21.")
+				AuthTokens.basic("DATABASE", "PASSWORD")
 		);
 
 		objectMapper = new ObjectMapper();
@@ -51,7 +51,7 @@ public class Neo4jConnection {
 	}
 
 	public List<Record> findNearestRelations(List<Float> embedding) {
-		try (Session session = driver.session(SessionConfig.forDatabase("chinook"))) {
+		try (Session session = driver.session(SessionConfig.forDatabase("DATABASE_NAME"))) {
 			String cypher = """
                     CALL db.index.vector.queryRelationships(
                         'relations_embedding_index',

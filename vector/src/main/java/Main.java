@@ -13,7 +13,7 @@ public class Main {
 				new Neo4jConnection();
 
 		GeminiService gemini =
-				new GeminiService("AQ.Ab8RN6JTGZteZrs6V9ZYjqQeCBIL-3fP6YHzOlWO-tX2XmBdxA");
+				new GeminiService("YOUR_API_KEY");
 
 		String question =
 				"Which tracks by the artist Audioslave have the \"Protected MPEG-4 video file\" media type?";
